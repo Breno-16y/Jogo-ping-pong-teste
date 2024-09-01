@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+        }
+        canvas {
+            background: #111;
+            border: 2px solid #fff;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="pong" width="800" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('pong');
+        const context = canvas.getContext('2d');
+
+        const paddleWidth = 10, paddleHeight = 100, ballSize = 10;
+        let leftPaddleY = canvas.height / 2 - paddleHeight / 2;
+        let rightPaddleY = canvas.height / 2 - paddleHeight / 2;
+        let ballX = canvas.width / 2, ballY = canvas.height / 2;
+        let ballSpeedX = 5, ballSpeedY = 2;
+        const paddleSpeed = 5;
+
+        function draw() {
+            // Clear canvas
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw paddles
+            context.fillStyle = '#fff';
+            context.fillRect(10, leftPaddleY, paddleWidth, paddleHeight);
+            context.fillRect(canvas.width - 20, rightPaddleY, paddleWidth, paddleHeight);
+
+            // Draw ball
+            context.beginPath();
+            context.arc(ballX, ballY, ballSize, 0, Math.PI * 2);
+            context.fill();
+        }
+
+        function update() {
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            // Ball collision with top and bottom walls
+            if (ballY - ballSize < 0 || ballY + ballSize > canvas.height) {
+                ballSpeedY = -ballSpeedY;
+            }
+
+            // Ball collision with paddles
+            if (ballX - ballSize < 20 && ballY > leftPaddleY && ballY < leftPaddleY + paddleHeight ||
+                ballX + ballSize > canvas.width - 20 && ballY > rightPaddleY && ballY < rightPaddleY + paddleHeight) {
+                ballSpeedX = -ballSpeedX;
+            }
+
+            // Ball out of bounds
+            if (ballX - ballSize < 0 || ballX + ballSize > canvas.width) {
+                // Reset ball to center
+                ballX = canvas.width / 2;
+                ballY = canvas.height / 2;
+                ballSpeedX = -ballSpeedX;
+            }
+
+            // Move paddles based on ball position
+            if (ballY > leftPaddleY + paddleHeight / 2) {
+                leftPaddleY = Math.min(canvas.height - paddleHeight, leftPaddleY + paddleSpeed);
+            } else {
+                leftPaddleY = Math.max(0, leftPaddleY - paddleSpeed);
+            }
+
+            if (ballY > rightPaddleY + paddleHeight / 2) {
+                rightPaddleY = Math.min(canvas.height - paddleHeight, rightPaddleY + paddleSpeed);
+            } else {
+                rightPaddleY = Math.max(0, rightPaddleY - paddleSpeed);
+            }
+        }
+
+        function gameLoop() {
+            draw();
+            update();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
